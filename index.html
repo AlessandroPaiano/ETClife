@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ETC life</title>
+<meta name="theme-color" content="#f6f4ef">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f6f4ef;
+  --ink:#14110f;
+  --ink-soft:#4a4440;
+  --ink-faint:#9a938c;
+  --blood:#14110f;
+  --frame:3px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"IM Fell English",Georgia,serif;
+  font-size:17px;
+  line-height:1.35;
+  min-height:100vh;
+  padding:14px 12px 40px;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' seed='4'/><feComponentTransfer><feFuncA type='discrete' tableValues='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1'/></feComponentTransfer></filter><rect width='260' height='260' filter='url(%23f)' opacity='0.55'/></svg>");
+  background-repeat:repeat;
+}
+.hidden{display:none !important}
+
+/* ---------- hand-drawn frames ---------- */
+.frame{position:relative;padding:18px 16px;margin:0 0 16px}
+.frame::before,.frame::after{content:"";position:absolute;pointer-events:none}
+.frame::before{
+  inset:0;border:var(--frame) solid var(--ink);
+  filter:url(#rough1);
+}
+.frame::after{
+  inset:6px;border:1px solid var(--ink);opacity:.75;
+  filter:url(#rough2);
+}
+.plate{position:relative;padding:10px 14px;margin:0 0 14px;text-align:center}
+.plate::before{
+  content:"";position:absolute;inset:0;border:var(--frame) solid var(--ink);
+  filter:url(#rough3);
+}
+
+/* ---------- type ---------- */
+h1{
+  font-family:"UnifrakturCook",serif;
+  font-weight:700;
+  font-size:clamp(34px,11vw,52px);
+  line-height:1;
+  margin:0;
+  text-align:center;
+  letter-spacing:.5px;
+}
+.tagline{
+  text-align:center;font-family:"IM Fell English SC",serif;
+  letter-spacing:.22em;text-transform:uppercase;font-size:12px;
+  color:var(--ink-soft);margin:8px 0 0;
+}
+.legend{
+  font-family:"IM Fell English SC",serif;
+  text-transform:uppercase;letter-spacing:.16em;font-size:13px;
+  color:var(--ink-soft);
+  margin:0 0 8px;text-align:center;
+}
+.gothic{font-family:"UnifrakturCook",serif;font-weight:700}
+
+/* ---------- buttons ---------- */
+button{
+  font-family:"IM Fell English SC",serif;
+  background:transparent;color:var(--ink);
+  border:none;cursor:pointer;font-size:16px;
+  letter-spacing:.1em;text-transform:uppercase;
+  position:relative;padding:12px 10px;
+}
+button::before{
+  content:"";position:absolute;inset:0;border:2px solid var(--ink);
+  filter:url(#rough2);
+}
+button:focus-visible{outline:2px dashed var(--ink);outline-offset:4px}
+button[aria-pressed="true"],button.solid{background:var(--ink);color:var(--paper)}
+button:disabled{color:var(--ink-faint);cursor:default}
+button:disabled::before{opacity:.4}
+button.plain::before{display:none}
+
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+
+/* option grids */
+.pick6{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.pick6 button{padding:14px 0;font-size:18px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+/* stepper */
+.stepper{display:flex;align-items:center;justify-content:center;gap:14px}
+.stepper .val{
+  font-family:"UnifrakturCook",serif;font-size:40px;line-height:1;min-width:74px;text-align:center;
+}
+.step-btn{width:56px;height:56px;flex:none;font-size:26px;padding:0;line-height:1}
+
+/* ---------- player cards ---------- */
+.card{position:relative;padding:14px 14px 16px;margin:0 0 14px}
+.card::before{content:"";position:absolute;inset:0;border:var(--frame) solid var(--ink);filter:url(#rough1)}
+.card-head{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+.name{
+  font-family:"UnifrakturCook",serif;font-size:24px;
+  background:transparent;border:none;border-bottom:1px solid var(--ink-faint);
+  color:var(--ink);width:100%;padding:2px 2px 4px;
+}
+.name:focus{outline:none;border-bottom-color:var(--ink)}
+.life-line{display:flex;align-items:center;gap:12px}
+.big{
+  font-family:"UnifrakturCook",serif;font-size:44px;line-height:1;min-width:2.1ch;text-align:center;
+}
+.of{font-size:15px;color:var(--ink-soft);margin-left:-6px}
+.tag{
+  font-family:"IM Fell English SC",serif;text-transform:uppercase;
+  letter-spacing:.16em;font-size:11px;color:var(--ink-soft);
+}
+.plague-line{display:flex;align-items:center;gap:12px;margin-top:12px;padding-top:12px;position:relative}
+.plague-line::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:1px;background:var(--ink);opacity:.55;
+  filter:url(#rough3);
+}
+.mini-btn{width:44px;height:44px;flex:none;font-size:22px;padding:0;line-height:1}
+.plague-val{font-family:"UnifrakturCook",serif;font-size:30px;min-width:1.6ch;text-align:center}
+
+/* slider */
+input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;background:transparent;height:34px;margin:0;
+}
+input[type=range]::-webkit-slider-runnable-track{height:4px;background:var(--ink);border-radius:0}
+input[type=range]::-moz-range-track{height:4px;background:var(--ink)}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:30px;height:30px;margin-top:-13px;
+  background:var(--paper);border:3px solid var(--ink);border-radius:50%;
+}
+input[type=range]::-moz-range-thumb{
+  width:26px;height:26px;background:var(--paper);border:3px solid var(--ink);border-radius:50%;
+}
+input[type=range]:focus-visible{outline:2px dashed var(--ink);outline-offset:2px}
+
+/* fallen */
+.card.fallen .name,.card.fallen .big,.card.fallen .plague-val{color:var(--ink-faint)}
+.card.fallen .cross{display:block}
+.cross{display:none;position:absolute;inset:0;pointer-events:none;width:100%;height:100%}
+.cross line{stroke:var(--ink);stroke-width:5;stroke-linecap:round;opacity:.8}
+.fallen-tag{
+  display:none;font-family:"IM Fell English SC",serif;letter-spacing:.2em;
+  text-transform:uppercase;font-size:12px;color:var(--ink-soft);
+}
+.card.fallen .fallen-tag{display:inline}
+
+footer{
+  text-align:center;margin-top:26px;font-family:"IM Fell English",serif;
+  font-size:13px;color:var(--ink-faint);letter-spacing:.08em;
+}
+.defs{position:absolute;width:0;height:0;overflow:hidden}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+@media (min-width:640px){
+  body{max-width:560px;margin:0 auto}
+}
+</style>
+</head>
+<body>
+
+<svg class="defs" aria-hidden="true">
+  <filter id="rough1" x="-6%" y="-6%" width="112%" height="112%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" seed="3" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="rough2" x="-6%" y="-6%" width="112%" height="112%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="11" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="3.5" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="rough3" x="-6%" y="-6%" width="112%" height="112%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="3" seed="27" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="4" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<header>
+  <h1>ETC life</h1>
+  <p class="tagline">Life tracker</p>
+</header>
+
+<!-- ============ SETUP ============ -->
+<main id="setup">
+  <div class="plate"><span class="gothic" style="font-size:22px">Select prisoners</span></div>
+
+  <section class="frame">
+    <p class="legend">Prisoners</p>
+    <div class="pick6" id="countPick"></div>
+
+    <p class="legend" style="margin-top:20px">Starting life</p>
+    <div class="stepper">
+      <button class="step-btn" id="maxDown" aria-label="Less life">&minus;</button>
+      <span class="val" id="maxVal">6</span>
+      <button class="step-btn" id="maxUp" aria-label="More life">+</button>
+    </div>
+
+    <p class="legend" style="margin-top:20px">Life shown as</p>
+    <div class="duo">
+      <button id="modeCounter" aria-pressed="true">Counter</button>
+      <button id="modeSlider" aria-pressed="false">Slider</button>
+    </div>
+
+    <p class="legend" style="margin-top:20px">Plague track</p>
+    <div class="duo">
+      <button id="plagueOff" aria-pressed="true">Off</button>
+      <button id="plagueOn" aria-pressed="false">On</button>
+    </div>
+  </section>
+
+  <div class="row">
+    <button id="resetBtn">Reset</button>
+    <button id="escapeBtn" class="solid">Escape</button>
+  </div>
+</main>
+
+<!-- ============ GAME ============ -->
+<main id="game" class="hidden">
+  <div id="cards"></div>
+  <div class="row">
+    <button id="backBtn">Setup</button>
+    <button id="healAllBtn">Restore all</button>
+  </div>
+</main>
+
+<footer>etc life</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  var KEY = "etc-life-v1";
+  var state = {
+    count: 3,
+    maxLife: 6,
+    mode: "counter",      // "counter" | "slider"
+    plague: false,
+    started: false,
+    players: []
+  };
+
+  function save(){
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){}
+  }
+  function load(){
+    try {
+      var raw = localStorage.getItem(KEY);
+      if(!raw) return;
+      var s = JSON.parse(raw);
+      if(s && typeof s === "object"){
+        state.count   = clamp(s.count|0, 1, 6) || 3;
+        state.maxLife = clamp(s.maxLife|0, 1, 18) || 6;
+        state.mode    = s.mode === "slider" ? "slider" : "counter";
+        state.plague  = !!s.plague;
+        state.started = !!s.started;
+        state.players = Array.isArray(s.players) ? s.players : [];
+      }
+    } catch(e){}
+  }
+  function clamp(n,lo,hi){ return Math.max(lo, Math.min(hi, n)); }
+
+  function makePlayers(){
+    var out = [];
+    for(var i=0;i<state.count;i++){
+      var old = state.players[i];
+      out.push({
+        name: (old && old.name) ? old.name : "Prisoner " + (i+1),
+        life: old ? clamp(old.life, 0, state.maxLife) : state.maxLife,
+        plague: old ? clamp(old.plague|0, 0, state.maxLife) : 0
+      });
+    }
+    state.players = out;
+  }
+
+  /* ---------- setup screen ---------- */
+  var setupEl = document.getElementById("setup");
+  var gameEl  = document.getElementById("game");
+  var countPick = document.getElementById("countPick");
+  var maxVal = document.getElementById("maxVal");
+
+  for(var n=1;n<=6;n++){
+    (function(v){
+      var b = document.createElement("button");
+      b.textContent = v;
+      b.setAttribute("aria-pressed","false");
+      b.setAttribute("aria-label", v + " prisoners");
+      b.addEventListener("click", function(){
+        state.count = v; save(); paintSetup();
+      });
+      countPick.appendChild(b);
+    })(n);
+  }
+
+  document.getElementById("maxDown").addEventListener("click", function(){
+    state.maxLife = clamp(state.maxLife - 1, 1, 18); save(); paintSetup();
+  });
+  document.getElementById("maxUp").addEventListener("click", function(){
+    state.maxLife = clamp(state.maxLife + 1, 1, 18); save(); paintSetup();
+  });
+  document.getElementById("modeCounter").addEventListener("click", function(){
+    state.mode = "counter"; save(); paintSetup();
+  });
+  document.getElementById("modeSlider").addEventListener("click", function(){
+    state.mode = "slider"; save(); paintSetup();
+  });
+  document.getElementById("plagueOff").addEventListener("click", function(){
+    state.plague = false; save(); paintSetup();
+  });
+  document.getElementById("plagueOn").addEventListener("click", function(){
+    state.plague = true; save(); paintSetup();
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", function(){
+    state.players = []; state.count = 3; state.maxLife = 6;
+    state.mode = "counter"; state.plague = false;
+    save(); paintSetup();
+  });
+
+  document.getElementById("escapeBtn").addEventListener("click", function(){
+    makePlayers();
+    state.started = true; save();
+    showGame();
+  });
+
+  document.getElementById("backBtn").addEventListener("click", function(){
+    state.started = false; save();
+    showSetup();
+  });
+
+  document.getElementById("healAllBtn").addEventListener("click", function(){
+    state.players.forEach(function(p){ p.life = state.maxLife; p.plague = 0; });
+    save(); paintCards();
+  });
+
+  function paintSetup(){
+    var kids = countPick.children;
+    for(var i=0;i<kids.length;i++){
+      kids[i].setAttribute("aria-pressed", (i+1 === state.count) ? "true" : "false");
+    }
+    maxVal.textContent = state.maxLife;
+    document.getElementById("maxDown").disabled = state.maxLife <= 1;
+    document.getElementById("maxUp").disabled = state.maxLife >= 18;
+    document.getElementById("modeCounter").setAttribute("aria-pressed", state.mode === "counter");
+    document.getElementById("modeSlider").setAttribute("aria-pressed", state.mode === "slider");
+    document.getElementById("plagueOff").setAttribute("aria-pressed", !state.plague);
+    document.getElementById("plagueOn").setAttribute("aria-pressed", state.plague);
+  }
+
+  function showSetup(){
+    setupEl.classList.remove("hidden");
+    gameEl.classList.add("hidden");
+    paintSetup();
+    window.scrollTo(0,0);
+  }
+  function showGame(){
+    setupEl.classList.add("hidden");
+    gameEl.classList.remove("hidden");
+    paintCards();
+    window.scrollTo(0,0);
+  }
+
+  /* ---------- game screen ---------- */
+  var cardsEl = document.getElementById("cards");
+
+  function el(tag, cls, txt){
+    var e = document.createElement(tag);
+    if(cls) e.className = cls;
+    if(txt !== undefined) e.textContent = txt;
+    return e;
+  }
+
+  function paintCards(){
+    cardsEl.innerHTML = "";
+    state.players.forEach(function(p, idx){
+      var card = el("div","card");
+      if(p.life <= 0) card.classList.add("fallen");
+
+      /* ink cross for fallen prisoners */
+      var cross = document.createElementNS("http://www.w3.org/2000/svg","svg");
+      cross.setAttribute("class","cross");
+      cross.setAttribute("viewBox","0 0 100 100");
+      cross.setAttribute("preserveAspectRatio","none");
+      cross.innerHTML = '<line x1="6" y1="8" x2="94" y2="92" filter="url(#rough2)"/>' +
+                        '<line x1="94" y1="8" x2="6" y2="92" filter="url(#rough2)"/>';
+      card.appendChild(cross);
+
+      /* name */
+      var head = el("div","card-head");
+      var name = document.createElement("input");
+      name.className = "name";
+      name.type = "text";
+      name.value = p.name;
+      name.setAttribute("aria-label","Prisoner name");
+      name.addEventListener("input", function(){
+        state.players[idx].name = name.value; save();
+      });
+      head.appendChild(name);
+      var fallen = el("span","fallen-tag","Fallen");
+      head.appendChild(fallen);
+      card.appendChild(head);
+
+      /* life */
+      if(state.mode === "counter"){
+        var line = el("div","life-line");
+        var minus = el("button","mini-btn","\u2212");
+        minus.setAttribute("aria-label","Lose one life");
+        var val = el("span","big", String(p.life));
+        var of  = el("span","of","/ " + state.maxLife);
+        var plus = el("button","mini-btn","+");
+        plus.setAttribute("aria-label","Gain one life");
+        minus.addEventListener("click", function(){ setLife(idx, p.life - 1); });
+        plus.addEventListener("click",  function(){ setLife(idx, p.life + 1); });
+        minus.disabled = p.life <= 0;
+        plus.disabled  = p.life >= state.maxLife;
+        line.appendChild(minus);
+        line.appendChild(val);
+        line.appendChild(of);
+        line.appendChild(plus);
+        card.appendChild(line);
+      } else {
+        var wrap = el("div");
+        var top = el("div","life-line");
+        top.appendChild(el("span","big", String(p.life)));
+        top.appendChild(el("span","of","/ " + state.maxLife));
+        var lbl = el("span","tag","Life");
+        lbl.style.marginLeft = "auto";
+        top.appendChild(lbl);
+        wrap.appendChild(top);
+        var slider = document.createElement("input");
+        slider.type = "range";
+        slider.min = 0; slider.max = state.maxLife; slider.step = 1; slider.value = p.life;
+        slider.setAttribute("aria-label","Life");
+        slider.addEventListener("input", function(){
+          state.players[idx].life = parseInt(slider.value,10);
+          save(); paintCards();
+        });
+        wrap.appendChild(slider);
+        card.appendChild(wrap);
+      }
+
+      /* plague */
+      if(state.plague){
+        var pl = el("div","plague-line");
+        var pMinus = el("button","mini-btn","\u2212");
+        pMinus.setAttribute("aria-label","Less plague");
+        var pVal = el("span","plague-val", String(p.plague));
+        var pTag = el("span","tag","Plague");
+        var pPlus = el("button","mini-btn","+");
+        pPlus.setAttribute("aria-label","More plague");
+        pMinus.addEventListener("click", function(){ setPlague(idx, p.plague - 1); });
+        pPlus.addEventListener("click",  function(){ setPlague(idx, p.plague + 1); });
+        pMinus.disabled = p.plague <= 0;
+        pPlus.disabled  = p.plague >= state.maxLife;
+        pl.appendChild(pMinus);
+        pl.appendChild(pVal);
+        pl.appendChild(pTag);
+        pTag.style.marginRight = "auto";
+        pl.appendChild(pPlus);
+        card.appendChild(pl);
+      }
+
+      cardsEl.appendChild(card);
+    });
+  }
+
+  function setLife(i, v){
+    state.players[i].life = clamp(v, 0, state.maxLife);
+    save(); paintCards();
+  }
+  function setPlague(i, v){
+    state.players[i].plague = clamp(v, 0, state.maxLife);
+    save(); paintCards();
+  }
+
+  /* ---------- boot ---------- */
+  load();
+  if(state.started && state.players.length){
+    makePlayers();
+    showGame();
+  } else {
+    showSetup();
+  }
+})();
+</script>
+</body>
+</html>
