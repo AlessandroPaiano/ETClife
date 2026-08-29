@@ -47,8 +47,10 @@ body{
 .plate{position:relative;padding:10px 14px;margin:0 0 14px;text-align:center}
 .plate::before{
   content:"";position:absolute;inset:0;border:var(--frame) solid var(--ink);
-  filter:url(#rough3);
+  filter:url(#rough3);pointer-events:none;
 }
+/* decorative ink lines must never swallow taps */
+.frame::before,.frame::after,.card::before,.plague-line::before,button::before{pointer-events:none}
 
 /* ---------- type ---------- */
 h1{
@@ -135,7 +137,8 @@ button.plain::before{display:none}
 
 /* slider */
 input[type=range]{
-  -webkit-appearance:none;appearance:none;width:100%;background:transparent;height:34px;margin:0;
+  -webkit-appearance:none;appearance:none;width:100%;background:transparent;height:40px;margin:0;
+  position:relative;z-index:2;touch-action:none;
 }
 input[type=range]::-webkit-slider-runnable-track{height:4px;background:var(--ink);border-radius:0}
 input[type=range]::-moz-range-track{height:4px;background:var(--ink)}
@@ -432,7 +435,8 @@ footer{
       } else {
         var wrap = el("div");
         var top = el("div","life-line");
-        top.appendChild(el("span","big", String(p.life)));
+        var bigVal = el("span","big", String(p.life));
+        top.appendChild(bigVal);
         top.appendChild(el("span","of","/ " + state.maxLife));
         var lbl = el("span","tag","Life");
         lbl.style.marginLeft = "auto";
@@ -443,8 +447,11 @@ footer{
         slider.min = 0; slider.max = state.maxLife; slider.step = 1; slider.value = p.life;
         slider.setAttribute("aria-label","Life");
         slider.addEventListener("input", function(){
-          state.players[idx].life = parseInt(slider.value,10);
-          save(); paintCards();
+          var v = parseInt(slider.value,10);
+          state.players[idx].life = v;
+          bigVal.textContent = v;
+          card.classList.toggle("fallen", v <= 0);
+          save();
         });
         wrap.appendChild(slider);
         card.appendChild(wrap);
