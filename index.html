@@ -111,13 +111,34 @@ button.plain::before{display:none}
 /* ---------- player cards ---------- */
 .card{position:relative;padding:14px 14px 16px;margin:0 0 14px}
 .card::before{content:"";position:absolute;inset:0;border:var(--frame) solid var(--ink);filter:url(#rough1)}
-.card-head{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+.card-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .name{
   font-family:"UnifrakturCook",serif;font-size:24px;
   background:transparent;border:none;border-bottom:1px solid var(--ink-faint);
   color:var(--ink);width:100%;padding:2px 2px 4px;
+  position:relative;z-index:2;
 }
 .name:focus{outline:none;border-bottom-color:var(--ink)}
+.pick-name{width:44px;height:44px;flex:none;padding:0;font-size:15px;line-height:1;z-index:2}
+
+/* name chooser */
+.overlay{
+  position:fixed;inset:0;z-index:50;
+  background:var(--paper);
+  background-image:inherit;
+  overflow-y:auto;
+  padding:20px 14px 30px;
+  display:flex;flex-direction:column;justify-content:center;
+}
+.overlay .inner{width:100%;max-width:520px;margin:0 auto}
+.name-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.name-grid button{
+  font-family:"UnifrakturCook",serif;text-transform:none;letter-spacing:0;
+  font-size:24px;padding:10px 4px;
+}
+.name-grid button::before{display:none}
+.name-grid button[aria-pressed="true"]{background:transparent;color:var(--ink);text-decoration:underline}
+.name-grid button:disabled{color:var(--ink-faint);text-decoration:line-through}
 .life-line{display:flex;align-items:center;gap:12px}
 .big{
   font-family:"UnifrakturCook",serif;font-size:44px;line-height:1;min-width:2.1ch;text-align:center;
@@ -133,7 +154,7 @@ button.plain::before{display:none}
   filter:url(#rough3);
 }
 .mini-btn{width:44px;height:44px;flex:none;font-size:22px;padding:0;line-height:1}
-.plague-val{font-family:"UnifrakturCook",serif;font-size:30px;min-width:1.6ch;text-align:center}
+.plague-val{font-family:"UnifrakturCook",serif;font-size:30px;min-width:2.4ch;text-align:center}
 
 /* slider */
 input[type=range]{
@@ -238,6 +259,19 @@ footer{
   </div>
 </main>
 
+<div id="nameOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-label="Select prisoner">
+  <div class="inner">
+    <div class="plate"><span class="gothic" style="font-size:22px">Select prisoner</span></div>
+    <section class="frame">
+      <div class="name-grid" id="nameGrid"></div>
+    </section>
+    <div class="row">
+      <button id="nameCustom">Type my own</button>
+      <button id="nameClose" class="solid">Close</button>
+    </div>
+  </div>
+</div>
+
 <footer>etc life</footer>
 
 <script>
@@ -281,7 +315,7 @@ footer{
       out.push({
         name: (old && old.name) ? old.name : "Prisoner " + (i+1),
         life: old ? clamp(old.life, 0, state.maxLife) : state.maxLife,
-        plague: old ? clamp(old.plague|0, 0, state.maxLife) : 0
+        plague: old ? Math.max(0, old.plague|0) : 0
       });
     }
     state.players = out;
@@ -410,6 +444,10 @@ footer{
         state.players[idx].name = name.value; save();
       });
       head.appendChild(name);
+      var pick = el("button","pick-name","\u25BE");
+      pick.setAttribute("aria-label","Choose a prisoner name");
+      pick.addEventListener("click", function(){ openNames(idx); });
+      head.appendChild(pick);
       var fallen = el("span","fallen-tag","Fallen");
       head.appendChild(fallen);
       card.appendChild(head);
@@ -469,7 +507,6 @@ footer{
         pMinus.addEventListener("click", function(){ setPlague(idx, p.plague - 1); });
         pPlus.addEventListener("click",  function(){ setPlague(idx, p.plague + 1); });
         pMinus.disabled = p.plague <= 0;
-        pPlus.disabled  = p.plague >= state.maxLife;
         pl.appendChild(pMinus);
         pl.appendChild(pVal);
         pl.appendChild(pTag);
@@ -487,9 +524,57 @@ footer{
     save(); paintCards();
   }
   function setPlague(i, v){
-    state.players[i].plague = clamp(v, 0, state.maxLife);
+    state.players[i].plague = Math.max(0, v);
     save(); paintCards();
   }
+
+  /* ---------- name chooser ---------- */
+  var ROSTER = ["Abbot","Hunter","Cook","Bishop","Miller","Mason",
+                "Smith","Fletcher","Tailor","Shepherd","Tanner","Butcher"];
+  var overlay = document.getElementById("nameOverlay");
+  var nameGrid = document.getElementById("nameGrid");
+  var editing = -1;
+
+  ROSTER.forEach(function(nm){
+    var b = el("button", null, nm);
+    b.setAttribute("aria-pressed","false");
+    b.addEventListener("click", function(){
+      if(editing < 0) return;
+      state.players[editing].name = nm;
+      save();
+      closeNames();
+      paintCards();
+    });
+    nameGrid.appendChild(b);
+  });
+
+  function openNames(i){
+    editing = i;
+    var taken = state.players.map(function(p,j){ return j === i ? null : p.name; });
+    var kids = nameGrid.children;
+    for(var k=0;k<kids.length;k++){
+      var nm = ROSTER[k];
+      kids[k].disabled = taken.indexOf(nm) !== -1;
+      kids[k].setAttribute("aria-pressed", state.players[i].name === nm ? "true" : "false");
+    }
+    overlay.classList.remove("hidden");
+    window.scrollTo(0,0);
+  }
+  function closeNames(){
+    overlay.classList.add("hidden");
+    editing = -1;
+  }
+
+  document.getElementById("nameClose").addEventListener("click", closeNames);
+  document.getElementById("nameCustom").addEventListener("click", function(){
+    var i = editing;
+    closeNames();
+    var field = cardsEl.querySelectorAll(".name")[i];
+    if(field){ field.focus(); field.select(); }
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape" && !overlay.classList.contains("hidden")) closeNames();
+  });
 
   /* ---------- boot ---------- */
   load();
